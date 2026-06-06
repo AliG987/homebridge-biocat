@@ -18,7 +18,7 @@ Das Plugin liest den Geraetestatus ueber `GET /state`, kann den Abwesenheitsmodu
 
 ## Voraussetzungen
 
-- Node.js `>= 22.0.0`
+- Node.js `>= 20.0.0`
 - Homebridge `^1.8.0`
 - Eine aktive myBIOCAT REST-API fuer dein Geraet
 - Ein API-Key aus `app.watercryst.com`

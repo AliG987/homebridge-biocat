@@ -1,7 +1,7 @@
 {
   "name": "homebridge-biocat",
   "displayName": "WATERCryst BIOCAT",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Homebridge plugin for WATERCryst BIOCAT devices.",
   "license": "MIT",
   "type": "commonjs",
@@ -20,7 +20,7 @@
     "homekit"
   ],
   "engines": {
-    "node": ">=22.0.0",
+    "node": ">=20.0.0",
     "homebridge": "^1.8.0"
   },
   "scripts": {
