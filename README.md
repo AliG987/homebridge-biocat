@@ -220,19 +220,6 @@ Veroeffentlichen:
 npm publish
 ```
 
-### Veroeffentlichen ohne lokale Node/npm-Installation
-
-Wenn du Node.js und npm nicht lokal auf deinem Mac installieren moechtest, kannst du ueber GitHub Actions veroeffentlichen:
-
-1. Code in ein oeffentliches GitHub-Repository pushen.
-2. Auf npmjs.com einen granularen Access Token mit Publish-Rechten fuer dieses Paket erstellen.
-3. In GitHub unter `Settings` -> `Secrets and variables` -> `Actions` ein Secret namens `NPM_TOKEN` anlegen.
-4. In GitHub einen Release veroeffentlichen oder den Workflow `Publish to npm` manuell starten.
-
-Der Workflow in `.github/workflows/publish.yml` installiert die Abhaengigkeiten, baut das Plugin, prueft den Paketinhalt und veroeffentlicht es auf npm.
-
-Nach dem ersten Publish kannst du in den npm-Paketeinstellungen Trusted Publishing fuer GitHub Actions einrichten und den Token wieder entfernen.
-
 ## Hinweise
 
 - Ohne `apiKey` bleibt die Plattform absichtlich inaktiv.
