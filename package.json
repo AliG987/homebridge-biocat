@@ -1,0 +1,35 @@
+{
+  "name": "homebridge-biocat",
+  "displayName": "WATERCryst BIOCAT",
+  "version": "0.1.0",
+  "description": "Homebridge plugin for WATERCryst BIOCAT devices.",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "config.schema.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "homebridge-plugin",
+    "homebridge",
+    "biocat",
+    "watercryst",
+    "homekit"
+  ],
+  "engines": {
+    "node": ">=22.0.0",
+    "homebridge": "^1.8.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "homebridge": "^1.8.5",
+    "typescript": "^5.8.2"
+  }
+}

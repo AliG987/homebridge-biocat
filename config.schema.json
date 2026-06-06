@@ -1,0 +1,98 @@
+{
+  "pluginAlias": "BiocatPlatform",
+  "pluginType": "platform",
+  "singular": true,
+  "strictValidation": false,
+  "schema": {
+    "type": "object",
+    "required": [
+      "name",
+      "apiKey"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "default": "BIOCAT",
+        "minLength": 1,
+        "required": true,
+        "description": "Display name used by Homebridge and HomeKit."
+      },
+      "apiBaseUrl": {
+        "title": "API Base URL",
+        "type": "string",
+        "format": "uri",
+        "default": "https://appapi.watercryst.com/v1",
+        "description": "Base URL of the WATERCryst myBIOCAT REST API."
+      },
+      "apiKey": {
+        "title": "API Key",
+        "type": "string",
+        "format": "password",
+        "minLength": 1,
+        "required": true,
+        "description": "API key from app.watercryst.com. It is sent as the X-API-KEY header."
+      },
+      "pollIntervalSeconds": {
+        "title": "Polling Interval",
+        "type": "integer",
+        "default": 60,
+        "minimum": 15,
+        "maximum": 86400,
+        "description": "Seconds between BIOCAT status refreshes."
+      },
+      "requestTimeoutMs": {
+        "title": "Request Timeout",
+        "type": "integer",
+        "default": 15000,
+        "minimum": 1000,
+        "maximum": 120000,
+        "description": "Maximum time in milliseconds for one API request."
+      },
+      "allowWaterSupplyOpen": {
+        "title": "Allow Opening Water Supply",
+        "type": "boolean",
+        "default": false,
+        "description": "Allows HomeKit to reopen the water supply. Closing remains available regardless of this setting."
+      },
+      "statistics": {
+        "title": "Statistics Logging",
+        "type": "object",
+        "additionalProperties": false,
+        "default": {
+          "enabled": true,
+          "directory": "biocat",
+          "fileName": "statistics.jsonl",
+          "stateFileName": ".statistics-state.json"
+        },
+        "properties": {
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean",
+            "default": true,
+            "description": "Writes daily statistics to a JSONL file in the Homebridge storage directory."
+          },
+          "directory": {
+            "title": "Directory",
+            "type": "string",
+            "default": "biocat",
+            "description": "Relative directory below the Homebridge storage path."
+          },
+          "fileName": {
+            "title": "File Name",
+            "type": "string",
+            "default": "statistics.jsonl",
+            "description": "JSONL file name for daily statistics."
+          },
+          "stateFileName": {
+            "title": "State File Name",
+            "type": "string",
+            "default": ".statistics-state.json",
+            "description": "File name used to remember the last logged statistics entry."
+          }
+        }
+      }
+    }
+  }
+}
