@@ -12,6 +12,43 @@ class BiocatApiError extends Error {
 
 type QueryValue = string | number | boolean | undefined;
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function formatErrorCause(error: unknown): string | undefined {
+  if (!isRecord(error)) {
+    return undefined;
+  }
+
+  const details: string[] = [];
+  for (const key of ['code', 'errno', 'syscall', 'hostname']) {
+    const value = error[key];
+    if (typeof value === 'string' || typeof value === 'number') {
+      details.push(`${key}=${value}`);
+    }
+  }
+
+  const message = error.message;
+  if (typeof message === 'string' && message.trim() !== '') {
+    details.push(`cause=${message}`);
+  }
+
+  return details.length > 0 ? details.join(', ') : undefined;
+}
+
+function formatRequestFailure(error: unknown, url: URL, timeoutMs: number): Error {
+  if (error instanceof Error && error.name === 'AbortError') {
+    return new Error(`BIOCAT request timed out after ${timeoutMs}ms for ${url.toString()}.`);
+  }
+
+  const message = error instanceof Error ? error.message : String(error);
+  const cause = error instanceof Error ? formatErrorCause(error.cause) : undefined;
+  const suffix = cause ? ` (${cause})` : '';
+
+  return new Error(`BIOCAT request failed for ${url.toString()}: ${message}${suffix}`);
+}
+
 export class BiocatClient {
   constructor(private readonly config: ResolvedBiocatPlatformConfig) {}
 
@@ -91,11 +128,16 @@ export class BiocatClient {
         }
       }
 
-      const response = await fetch(url, {
-        method: 'GET',
-        headers,
-        signal: controller.signal,
-      });
+      let response: Response;
+      try {
+        response = await fetch(url, {
+          method: 'GET',
+          headers,
+          signal: controller.signal,
+        });
+      } catch (error) {
+        throw formatRequestFailure(error, url, this.config.requestTimeoutMs);
+      }
 
       const responseText = await response.text();
       if (!response.ok) {
