@@ -86,7 +86,7 @@ export class BiocatAccessory {
         this.platform.Characteristic.LeakDetected,
         snapshot.waterProtection.leakDetected
           ? this.platform.Characteristic.LeakDetected.LEAK_DETECTED
-          : this.platform.Characteristic.LeakDetected.NOT_DETECTED,
+          : this.platform.Characteristic.LeakDetected.LEAK_NOT_DETECTED,
       )
       .updateCharacteristic(
         this.platform.Characteristic.StatusFault,
