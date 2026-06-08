@@ -1,9 +1,18 @@
 {
   "name": "homebridge-biocat",
   "displayName": "WATERCryst BIOCAT",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Homebridge plugin for WATERCryst BIOCAT devices.",
+  "author": "Alexander Muthler",
   "license": "MIT",
+  "homepage": "https://github.com/AliG987/homebridge-biocat#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AliG987/homebridge-biocat.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AliG987/homebridge-biocat/issues"
+  },
   "type": "commonjs",
   "main": "dist/index.js",
   "files": [
@@ -20,8 +29,8 @@
     "homekit"
   ],
   "engines": {
-    "node": ">=20.0.0",
-    "homebridge": "^1.8.0"
+    "node": "^22.10.0 || ^24.0.0",
+    "homebridge": "^1.8.0 || ^2.0.0"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -29,7 +38,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
-    "homebridge": "^1.8.5",
+    "homebridge": "^2.0.0",
     "typescript": "^5.8.2"
   }
 }
