@@ -16,7 +16,6 @@
         "type": "string",
         "default": "BIOCAT",
         "minLength": 1,
-        "required": true,
         "description": "Display name used by Homebridge and HomeKit."
       },
       "apiBaseUrl": {
@@ -31,7 +30,6 @@
         "type": "string",
         "format": "password",
         "minLength": 1,
-        "required": true,
         "description": "API key from app.watercryst.com. It is sent as the X-API-KEY header."
       },
       "pollIntervalSeconds": {
