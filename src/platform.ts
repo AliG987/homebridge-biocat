@@ -77,7 +77,7 @@ export class BiocatPlatform implements DynamicPlatformPlugin {
 
   async setWaterSupplyOpen(open: boolean): Promise<void> {
     if (open && !this.resolvedConfig.allowWaterSupplyOpen) {
-      throw new Error('Opening the BIOCAT water supply from HomeKit is disabled. Set allowWaterSupplyOpen=true to enable it.');
+      throw new Error('The BIOCAT Reopen Water Supply command is disabled. Set allowWaterSupplyOpen=true to enable it.');
     }
 
     await this.runAction(
@@ -92,36 +92,53 @@ export class BiocatPlatform implements DynamicPlatformPlugin {
       return;
     }
 
-    const accessory = this.ensureAccessory();
-    this.accessoryHandler = new BiocatAccessory(this, accessory);
+    const mainAccessory = this.ensureAccessory('main', this.accessoryName);
+    const shutoffAccessory = this.ensureAccessory('water-shutoff', `${this.accessoryName} Emergency Shutoff`);
+    const reopenAccessory = this.resolvedConfig.allowWaterSupplyOpen
+      ? this.ensureAccessory('water-reopen', `${this.accessoryName} Reopen Water Supply`)
+      : undefined;
+
+    this.unregisterStaleAccessories(new Set([
+      mainAccessory.UUID,
+      shutoffAccessory.UUID,
+      ...(reopenAccessory ? [reopenAccessory.UUID] : []),
+    ]));
+
+    this.accessoryHandler = new BiocatAccessory(this, mainAccessory, shutoffAccessory, reopenAccessory);
     await this.statisticsLogger.initialize();
     await this.refreshDeviceState();
     this.startPolling();
   }
 
-  private ensureAccessory(): PlatformAccessory {
-    const uuid = this.api.hap.uuid.generate(`${PLATFORM_NAME}:${this.resolvedConfig.apiBaseUrl}:${this.accessoryName}`);
+  private ensureAccessory(accessoryType: 'main' | 'water-shutoff' | 'water-reopen', displayName: string): PlatformAccessory {
+    const uuidSeed = accessoryType === 'main'
+      ? `${PLATFORM_NAME}:${this.resolvedConfig.apiBaseUrl}:${this.accessoryName}`
+      : `${PLATFORM_NAME}:${this.resolvedConfig.apiBaseUrl}:${this.accessoryName}:${accessoryType}`;
+    const uuid = this.api.hap.uuid.generate(uuidSeed);
     const existingAccessory = this.cachedAccessories.get(uuid);
 
+    if (existingAccessory) {
+      return existingAccessory;
+    }
+
+    const accessory = new this.api.platformAccessory(displayName, uuid);
+    accessory.context.deviceId = uuid;
+    accessory.context.accessoryType = accessoryType;
+    this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+    this.cachedAccessories.set(uuid, accessory);
+
+    return accessory;
+  }
+
+  private unregisterStaleAccessories(desiredUuids: Set<string>): void {
     for (const [cachedUuid, cachedAccessory] of this.cachedAccessories.entries()) {
-      if (cachedUuid === uuid) {
+      if (desiredUuids.has(cachedUuid)) {
         continue;
       }
 
       this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [cachedAccessory]);
       this.cachedAccessories.delete(cachedUuid);
     }
-
-    if (existingAccessory) {
-      return existingAccessory;
-    }
-
-    const accessory = new this.api.platformAccessory(this.accessoryName, uuid);
-    accessory.context.deviceId = uuid;
-    this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-    this.cachedAccessories.set(uuid, accessory);
-
-    return accessory;
   }
 
   private startPolling(): void {
@@ -174,7 +191,13 @@ export class BiocatPlatform implements DynamicPlatformPlugin {
       );
 
       if (!this.accessoryHandler) {
-        this.accessoryHandler = new BiocatAccessory(this, this.ensureAccessory());
+        const mainAccessory = this.ensureAccessory('main', this.accessoryName);
+        const shutoffAccessory = this.ensureAccessory('water-shutoff', `${this.accessoryName} Emergency Shutoff`);
+        const reopenAccessory = this.resolvedConfig.allowWaterSupplyOpen
+          ? this.ensureAccessory('water-reopen', `${this.accessoryName} Reopen Water Supply`)
+          : undefined;
+
+        this.accessoryHandler = new BiocatAccessory(this, mainAccessory, shutoffAccessory, reopenAccessory);
       }
 
       this.accessoryHandler.update(snapshot);

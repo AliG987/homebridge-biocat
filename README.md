@@ -2,15 +2,17 @@
 
 Ein Homebridge-Plugin fuer WATERCryst BIOCAT-Anlagen auf Basis der offiziellen myBIOCAT REST-API.
 
-Das Plugin liest den Geraetestatus ueber `GET /state`, kann den Abwesenheitsmodus schalten, die Wasserzufuhr schliessen und optional auch wieder oeffnen. Zusaetzlich werden Tagesstatistiken als JSONL protokolliert.
+Das Plugin liest den Geraetestatus ueber `GET /state`, kann den Abwesenheitsmodus schalten, die Wasserzufuhr per Notabschaltung schliessen und optional auch wieder oeffnen. Zusaetzlich werden Tagesstatistiken als JSONL protokolliert.
 
 ## Funktionsumfang
 
 - Dynamisches Homebridge-Platform-Plugin
 - Native HomeKit-Services fuer BIOCAT-Funktionen
 - `LeakSensor` fuer Leckage- und Stoerungsanzeige
-- `Valve` fuer die Wasserzufuhr
+- `Valve` fuer den Status der Wasserzufuhr
 - `Switch` fuer `Absence Mode`
+- Separater Momentary-`Switch` fuer `Emergency Shutoff`
+- Optionaler separater Momentary-`Switch` fuer `Reopen Water Supply`
 - `FilterMaintenance` fuer Wartungs- und Wechselhinweise
 - Offizielle WATERCryst API mit `X-API-KEY`
 - JSONL-Statistiklogging mit Duplikatschutz
@@ -79,7 +81,7 @@ Beispiel fuer `config.json`:
 | `headers` | `object` | `{}` | Optionale zusaetzliche HTTP-Header |
 | `pollIntervalSeconds` | `number` | `60` | Polling-Intervall, intern auf `15` bis `86400` begrenzt |
 | `requestTimeoutMs` | `number` | `15000` | Timeout pro API-Aufruf, intern auf `1000` bis `120000` begrenzt |
-| `allowWaterSupplyOpen` | `boolean` | `false` | Erlaubt das Oeffnen der Wasserzufuhr aus HomeKit heraus |
+| `allowWaterSupplyOpen` | `boolean` | `false` | Zeigt einen separaten Momentary-Schalter zum Wieder-Oeffnen der Wasserzufuhr an |
 | `statistics.enabled` | `boolean` | `true` | Aktiviert das Tagesstatistik-Logging |
 | `statistics.directory` | `string` | `biocat` | Relativer Ordner unterhalb des Homebridge-Storage-Pfads |
 | `statistics.fileName` | `string` | `statistics.jsonl` | Dateiname fuer JSONL-Statistiken |
@@ -95,8 +97,10 @@ Hinweis:
 Das Plugin legt ein dynamisches Accessory mit diesen nativen HomeKit-Services an:
 
 - `LeakSensor`: zeigt Leckage oder relevante Stoerungen an
-- `Valve`: zeigt den Zustand der Wasserzufuhr und kann sie schliessen
+- `Valve`: zeigt, ob die Wasserzufuhr offen oder geschlossen ist
 - `Switch`: `Absence Mode` ein- oder ausschalten
+- `Switch`: `Emergency Shutoff` als separater Momentary-Befehl zum Schliessen der Wasserzufuhr
+- Optionaler `Switch`: `Reopen Water Supply` als separater Momentary-Befehl zum Oeffnen der Wasserzufuhr
 - `FilterMaintenance`: Wartungs- bzw. Granulatwechsel-Hinweise
 - `AccessoryInformation`: Hersteller, Modell, Seriennummer, Firmware
 
@@ -114,13 +118,25 @@ Intern nutzt das Plugin:
 - `GET /absence/enable`
 - `GET /absence/disable`
 
-### Water Supply Valve
+### Water Supply
 
-Die Wasserzufuhr wird als HomeKit-`Valve` exponiert.
+Die Wasserzufuhr wird im Hauptgeraet weiterhin als HomeKit-`Valve` angezeigt, damit Symbol und Geraetetyp passen. Direkte Schaltversuche auf diesem Valve werden ignoriert und auf den echten BIOCAT-Status zurueckgesetzt.
+
+Zum Schliessen legt das Plugin ein separates Accessory mit einem Momentary-`Switch` an:
+
+- `BIOCAT Emergency Shutoff`
 
 Damit sind Automationen moeglich wie:
 
-- Wenn ein HomeKit-Wassersensor ein Leck erkennt, `Water Supply` ausschalten
+- Wenn ein Aqara- oder anderer HomeKit-Wassersensor ein Leck erkennt, `BIOCAT Emergency Shutoff` einschalten
+
+Der Schalter springt nach dem Befehl automatisch wieder auf `Off`.
+
+Wenn `allowWaterSupplyOpen` auf `true` gesetzt ist, legt das Plugin zusaetzlich an:
+
+- `BIOCAT Reopen Water Supply`
+
+Auch dieser Schalter ist ein Momentary-Befehl und springt nach dem Oeffnen wieder auf `Off`.
 
 Intern nutzt das Plugin:
 
@@ -129,7 +145,8 @@ Intern nutzt das Plugin:
 
 Sicherheitsverhalten:
 
-- Schliessen ist immer erlaubt
+- Der Wasserzufuhrstatus ist nicht direkt ueber das Valve schaltbar
+- Schliessen ist ueber `Emergency Shutoff` immer verfuegbar
 - Oeffnen ist standardmaessig gesperrt
 - Wenn du das Oeffnen aus HomeKit erlauben willst, setze `allowWaterSupplyOpen` auf `true`
 

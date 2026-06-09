@@ -51,10 +51,10 @@
         "description": "Maximum time in milliseconds for one API request."
       },
       "allowWaterSupplyOpen": {
-        "title": "Allow Opening Water Supply",
+        "title": "Expose Reopen Water Supply Command",
         "type": "boolean",
         "default": false,
-        "description": "Allows HomeKit to reopen the water supply. Closing remains available regardless of this setting."
+        "description": "Adds a separate momentary switch that can reopen the water supply from HomeKit. Emergency shutoff remains available regardless of this setting."
       },
       "statistics": {
         "title": "Statistics Logging",
